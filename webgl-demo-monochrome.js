@@ -1,5 +1,5 @@
 import { spriteIndexed } from "./SpriteSheet.js";
-import { palette } from "./SpriteSheet.js";
+
 main();
 
 function main() {
@@ -43,26 +43,6 @@ function main() {
     spriteIndexed
   )
 
-  const colorPalette = gl.createTexture()
-  gl.activeTexture(gl.TEXTURE1)
-  gl.bindTexture(gl.TEXTURE_2D, colorPalette)
-
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  
-  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  gl.texImage2D(
-    gl.TEXTURE_2D,
-    0,
-    gl.RGBA,
-    16,
-    1,
-    0,
-    gl.RGBA,
-    gl.UNSIGNED_BYTE,
-    palette
-  )
-
   
   const [vertexShader, fragmentShader] = compileShaders(gl)
 
@@ -79,7 +59,6 @@ function main() {
   gl.vertexAttribPointer(vertexPositionLoc, 2, gl.FLOAT, false, 0, 0)
 
   gl.uniform1i(gl.getUniformLocation(program, "u_texture"), 0)
-  gl.uniform1i(gl.getUniformLocation(program, "u_color_texture"), 1)
 
   gl.viewport(0,0,canvas.width,canvas.height)
 
@@ -113,13 +92,10 @@ function compileShaders(gl) {
   const fragmentSource = `\
     precision mediump float;
     uniform sampler2D u_texture;
-    uniform sampler2D u_color_texture;
     varying vec2 v_uv;
     void main() {
       vec4 color = texture2D(u_texture,v_uv);
-      float index = color.r * 255.0 + 0.5;
-      vec4 palette_color = texture2D(u_color_texture, vec2(index / 16.0, 0.0));
-      gl_FragColor = vec4(palette_color.r * 1.0, palette_color.g * 1.0, palette_color.b * 1.0, 1.0);
+      gl_FragColor = vec4(color.r * 24.0, color.r * 32.0, color.r * 24.0, 1.0);
     }
   `
   gl.shaderSource(fragmentShader, fragmentSource)
