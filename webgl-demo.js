@@ -4,7 +4,9 @@ main();
 
 function main() {
   const canvas = document.querySelector("#gl-canvas")
-  const gl = canvas.getContext("webgl2")
+  const gl = initGl(canvas)
+  
+  
 
   const vertices = [
     -1, -1,
@@ -16,12 +18,42 @@ function main() {
     1,-1
 
   ]
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+  gl.clearColor(0,0,0.26,1)
+  gl.clear(gl.COLOR_BUFFER_BIT)
 
-  //NEW
-  const pixels = [
-    1, 2,
-    3, 4
-  ]
+  
+  // gl.drawArrays(gl.TRIANGLES, 0 , vertices.length/2)
+  drawSprite(canvas, gl, 1, 0, 0)
+}
+
+
+function drawSprite(canvas, gl, index, x, y, width=16, height=16) {
+  x = (x - 0.5) * 2
+  y = (y - 0.5) * 2
+  x /= canvas.width
+  y /= canvas.height
+  width /= canvas.width
+  height /= canvas.height
+
+  console.log(canvas.width)
+  
+  const vertices = new Float32Array([
+    x, y,
+    x + width, y,
+    x, y + height,
+    x, y + height,
+    x + width, y,
+    x + width, y + height
+  ])
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+  gl.drawArrays(gl.TRIANGLES, 0 , vertices.length/2)
+}
+
+
+function initGl(canvas) {
+  const gl = canvas.getContext("webgl2")
+  
 
   const texture = gl.createTexture()
   gl.activeTexture(gl.TEXTURE0)
@@ -47,7 +79,7 @@ function main() {
   gl.activeTexture(gl.TEXTURE1)
   gl.bindTexture(gl.TEXTURE_2D, colorPalette)
 
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   
   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
@@ -72,25 +104,20 @@ function main() {
   const vertexBuffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
 
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-
+  
   const vertexPositionLoc = gl.getAttribLocation(program, "vertex_position")
   gl.enableVertexAttribArray(vertexPositionLoc)
   gl.vertexAttribPointer(vertexPositionLoc, 2, gl.FLOAT, false, 0, 0)
-
+  
   gl.uniform1i(gl.getUniformLocation(program, "u_texture"), 0)
   gl.uniform1i(gl.getUniformLocation(program, "u_color_texture"), 1)
-
+  
   gl.viewport(0,0,canvas.width,canvas.height)
 
-
-  gl.clearColor(0,0,0.26,1)
-  gl.clear(gl.COLOR_BUFFER_BIT)
-
-  
-  gl.drawArrays(gl.TRIANGLES, 0 , vertices.length/2)
-  
+  return gl
 }
+
+
 
 function compileShaders(gl) {
   const vertexShader = gl.createShader(gl.VERTEX_SHADER)
@@ -102,7 +129,7 @@ function compileShaders(gl) {
   varying vec2 v_uv;
   void main() {
     gl_Position = vec4(vertex_position, 0.0, 1.0);
-    v_uv = vec2((vertex_position.x * -1.0 + 1.0)/2.0, (vertex_position.y * -1.0 + 1.0) / 2.0);
+    v_uv = vec2((vertex_position.x + 1.0)/2.0, (vertex_position.y * -1.0 + 1.0) / 2.0);
   }
   `
   
