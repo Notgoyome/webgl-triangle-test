@@ -17,8 +17,8 @@ function main() {
 
   //NEW
   const pixels = [
-    1, 2,
-    3, 4
+    0, 3,
+    7, 15
   ]
 
   const texture = gl.createTexture()
@@ -93,7 +93,7 @@ function compileShaders(gl) {
     varying vec2 v_uv;
     void main() {
       vec4 color = texture2D(u_texture,v_uv);
-      gl_FragColor = vec4(color.r * 64.0, color.g, color.b, 1.0);
+      gl_FragColor = vec4(color.r * 16.0, color.r * 16.0, color.r * 16.0, 1.0);
     }
   `
   gl.shaderSource(fragmentShader, fragmentSource)

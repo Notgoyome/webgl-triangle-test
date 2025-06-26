@@ -1,4 +1,3 @@
-
 main();
 
 function main() {
@@ -10,37 +9,37 @@ function main() {
     -1, 1,
     1, -1,
 
-    // -1, -1,
-    // 0, 1,
-    // 1, -1,
-
     1,1,
     -1,1,
     1,-1
+
   ]
 
-  //
   const pixels = [
-    255, 0, 0, 1,      255, 0, 255, 1, // red, purple
-    0, 0, 255, 1,    0, 255, 0, 1 // blue, green
+    0, 1,
+    2, 3
   ]
 
   const texture = gl.createTexture()
   gl.activeTexture(gl.TEXTURE0)
   gl.bindTexture(gl.TEXTURE_2D, texture)
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
   gl.texImage2D(
     gl.TEXTURE_2D,
     0,
-    gl.RGBA,
+    gl.R8, // 
     2,
     2,
     0,
-    gl.RGBA,
+    gl.RED,
     gl.UNSIGNED_BYTE,
     new Uint8Array(pixels)
   )
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
   
   const [vertexShader, fragmentShader] = compileShaders(gl)
 
@@ -74,11 +73,12 @@ function compileShaders(gl) {
 
   //GET RGBA
   const vertexSource = `\
+  
   attribute vec2 vertex_position;
   varying vec2 v_uv;
   void main() {
     gl_Position = vec4(vertex_position, 0.0, 1.0);
-    v_uv = vec2((vertex_position.x + 1)/ 2.0, (vertex_position.y + 1) / 2.0);
+    v_uv = vec2((vertex_position.x + 1.0)/2.0, (vertex_position.y + 1.0) / 2.0);
   }
   `
   
@@ -92,7 +92,7 @@ function compileShaders(gl) {
     varying vec2 v_uv;
     void main() {
       vec4 color = texture2D(u_texture,v_uv);
-      gl_FragColor = vec4(color.r, color.g, color.b, 1.0);
+      gl_FragColor = vec4(color.r * 64.0, color.g, color.b, 1.0);
     }
   `
   gl.shaderSource(fragmentShader, fragmentSource)
