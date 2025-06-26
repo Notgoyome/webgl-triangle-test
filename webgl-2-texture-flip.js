@@ -5,6 +5,27 @@ function main() {
   const canvas = document.querySelector("#gl-canvas")
   const gl = canvas.getContext("webgl2")
 
+  // const vertices = [
+  //   // -1, -1,
+  //   // -1, 1,
+  //   // 1, -1,
+
+  //   -1, -1,
+  //   0, 1,
+  //   1, -1,
+
+  //   // 1,1,
+  //   // -1,1,
+  //   // 1,-1
+  // ]
+
+  // const uvs = [
+  //   0.5, 1,
+  //   0, 0,
+  //   1, 0,
+  // ]
+
+
   const vertices = [
     -1, -1,
     -1, 1,
@@ -19,10 +40,21 @@ function main() {
     1,-1
   ]
 
+  const uvs = [
+
+    1, 1,
+    0, 1,
+    1, 0,
+  
+    0, 0,
+    0, 1,
+    1, 0,
+  ]
+
   //
   const pixels = [
-    255, 0, 0, 1,      255, 0, 255, 1, // red, purple
-    0, 0, 255, 1,    0, 255, 0, 1 // blue, green
+    255, 0, 77 , 1, 126, 37, 83 	, 1, // red, purple
+    41, 173, 255, 1, 0, 228, 54, 1 // blue, green
   ]
 
   const texture = gl.createTexture()
@@ -56,6 +88,13 @@ function main() {
   gl.enableVertexAttribArray(vertexPositionLoc)
   gl.vertexAttribPointer(vertexPositionLoc, 2, gl.FLOAT, false, 0, 0)
 
+  const textureBuffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer)
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW)
+  const uvPositionLoc = gl.getAttribLocation(program, "uv_position")
+  gl.enableVertexAttribArray(uvPositionLoc)
+  gl.vertexAttribPointer(uvPositionLoc, 2, gl.FLOAT, false, 0, 0)
+  
   gl.uniform1i(gl.getUniformLocation(program, "u_texture"), 0)
 
   gl.viewport(0,0,canvas.width,canvas.height)
@@ -75,10 +114,11 @@ function compileShaders(gl) {
   //GET RGBA
   const vertexSource = `\
   attribute vec2 vertex_position;
+  attribute vec2 uv_position;
   varying vec2 v_uv;
   void main() {
     gl_Position = vec4(vertex_position, 0.0, 1.0);
-    v_uv = vec2((vertex_position.x + 1)/ 2.0, (vertex_position.y + 1) / 2.0);
+    v_uv = uv_position;
   }
   `
   

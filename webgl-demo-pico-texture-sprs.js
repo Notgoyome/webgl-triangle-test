@@ -4,43 +4,38 @@ main();
 
 function main() {
   const canvas = document.querySelector("#gl-canvas")
-  const spriteSize = 128.0
   const gl = canvas.getContext("webgl2")
 
-  const s = canvas.height / spriteSize
-
-  const x = 40
-  const y = 40
-  const n_sprite = 0
-
   const vertices = [
-    x, y, // bottom left
-    x, spriteSize + y, // upper left
-    spriteSize + x, y, // bottom right
+    -1, -1,
+    -1, 1,
+    1, -1,
 
-    spriteSize + x, spriteSize + y,
-    x,spriteSize + y,
-    spriteSize + x,y
+    1,1,
+    -1,1,
+    1,-1
 
   ]
+  // const uvs = [
+  //   0, 0,
+  //   0, 1,
+  //   1, 0,
 
-  const sprite_x = n_sprite % 16
-  const sprite_y = Math.floor(n_sprite / 16)
-
-  const uv_x = sprite_x/s
-  const uv_y = sprite_y/s
+  //   1, 1,
+  //   0, 1,
+  //   1, 0,
+  // ]
 
   const uvs = [
-    uv_x, uv_y,
-    uv_x, uv_y + 1/s,
-    uv_x + 1/s, uv_y,
-    
-    uv_x + 1/s, uv_y + 1/s,
-    uv_x, uv_y + 1/s,
-    uv_x + 1/s, uv_y
+    0, 1,
+    0, 0,
+    1, 1,
+
+    1, 0,
+    0, 0,
+    1, 1,
   ]
 
-  //create spritesheet texture
   const texture = gl.createTexture()
   gl.activeTexture(gl.TEXTURE0)
   gl.bindTexture(gl.TEXTURE_2D, texture)
@@ -48,6 +43,7 @@ function main() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
   gl.texImage2D(
     gl.TEXTURE_2D,
     0,
@@ -60,7 +56,6 @@ function main() {
     spriteIndexed
   )
 
-  //create texture for color palette
   const colorPalette = gl.createTexture()
   gl.activeTexture(gl.TEXTURE1)
   gl.bindTexture(gl.TEXTURE_2D, colorPalette)
@@ -82,7 +77,7 @@ function main() {
   )
 
   
-  const [vertexShader, fragmentShader] = compileShaders(gl, spriteSize)
+  const [vertexShader, fragmentShader] = compileShaders(gl)
 
   const program = makeProgram(gl, vertexShader, fragmentShader)
 
@@ -117,7 +112,7 @@ function main() {
   
 }
 
-function compileShaders(gl, spriteSize) {
+function compileShaders(gl) {
   const vertexShader = gl.createShader(gl.VERTEX_SHADER)
 
   //GET RGBA
@@ -126,14 +121,11 @@ function compileShaders(gl, spriteSize) {
   attribute vec2 uv_position;
   varying vec2 v_uv;
   void main() {
-    vec2 normalized_position = vec2((vertex_position - vec2(64.0,64.0)) / vec2(${64},${64})); // USE UNIFORM 
-    vec2 flipped_position = vec2(normalized_position.x, -normalized_position.y);
-    gl_Position = vec4(flipped_position, 0.0, 1.0);
+    gl_Position = vec4(vertex_position, 0.0, 1.0);
     v_uv = uv_position;
   }
   `
-  // si 0 c'est -1 et 128 c'est 1 alors 64 c'est 0 donc
-  // normalized = (position - 64) / spriteSize
+  
   gl.shaderSource(vertexShader, vertexSource)
   gl.compileShader(vertexShader)
   
@@ -144,11 +136,10 @@ function compileShaders(gl, spriteSize) {
     uniform sampler2D u_color_texture;
     varying vec2 v_uv;
     void main() {
-      vec4 color = texture2D(u_texture,v_uv); // getting the index
-      float index = color.r * 255.0;
-
+      vec4 color = texture2D(u_texture,v_uv);
+      float index = color.r * 255.0 + 0.5;
       vec4 palette_color = texture2D(u_color_texture, vec2(index / 16.0, 0.0));
-      gl_FragColor = vec4(palette_color.r, palette_color.g, palette_color.b, 1.0);
+      gl_FragColor = vec4(palette_color.r * 1.0, palette_color.g * 1.0, palette_color.b * 1.0, 1.0);
     }
   `
   gl.shaderSource(fragmentShader, fragmentSource)

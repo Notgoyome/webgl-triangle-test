@@ -9,14 +9,6 @@ function main() {
     0, 1, // upper vertice
     1, -1, // right down vertice    
   ]
-  const textureUv = [
-    0, 0,
-    0.5, 1,
-    1, 0   
-  ]
-  // 1,1,
-  // 0,1,
-  // -1,0
   
   const vertexShader = gl.createShader(gl.VERTEX_SHADER)
 
